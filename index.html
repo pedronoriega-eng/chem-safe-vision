@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ChemSafe Vision - Safety Scanner Demo</title>
+    <title>ChemSafe Vision - Safety Scanner</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#197fe6">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -22,7 +22,6 @@
                         "surface-dark": "#1a2430",
                     },
                     fontFamily: { "display": ["Inter", "sans-serif"] },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
                 },
             },
         }
@@ -39,11 +38,19 @@
         .scan-animation { background: linear-gradient(to bottom, transparent 45%, rgba(25, 127, 230, 0.5) 50%, transparent 55%); animation: scan-line 2s linear infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .animate-pulse-custom { animation: pulse 2s infinite; }
+        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid #197fe6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
 
-    <!-- ========== HEADER ========== -->
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-background-light dark:bg-background-dark flex flex-col items-center justify-center z-50">
+        <div class="loading-spinner mb-4"></div>
+        <p class="text-slate-500">Cargando ChemSafe Vision...</p>
+    </div>
+
+    <!-- Header -->
     <header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark px-6 lg:px-10 py-3 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="size-8 text-primary flex items-center justify-center">
@@ -67,11 +74,9 @@
         </div>
     </header>
 
-    <!-- ========== DASHBOARD ========== -->
+    <!-- DASHBOARD -->
     <div id="screen-dashboard" class="screen active">
         <div class="max-w-7xl mx-auto px-6 lg:px-40 py-8">
-            
-            <!-- Hero -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 pb-6 border-b border-slate-200">
                 <div>
                     <h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Panel de Seguridad</h1>
@@ -82,85 +87,19 @@
                     Escanear Ahora
                 </button>
             </div>
-
-            <!-- Stats -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="p-2 bg-blue-50 rounded-lg text-primary"><span class="material-symbols-outlined">barcode_reader</span></div>
-                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
-                    </div>
-                    <p class="text-sm text-slate-500 uppercase tracking-wider">Escaneos Totales</p>
-                    <p class="text-3xl font-black text-slate-900 dark:text-white">1,847</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="p-2 bg-orange-50 rounded-lg text-orange-500"><span class="material-symbols-outlined">warning</span></div>
-                        <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-full">+3</span>
-                    </div>
-                    <p class="text-sm text-slate-500 uppercase tracking-wider">Alertas Hoy</p>
-                    <p class="text-3xl font-black text-slate-900 dark:text-white">7</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="p-2 bg-red-50 rounded-lg text-red-500"><span class="material-symbols-outlined">emergency</span></div>
-                        <span class="text-xs font-medium text-slate-500">24h</span>
-                    </div>
-                    <p class="text-sm text-slate-500 uppercase tracking-wider">Emergencias</p>
-                    <p class="text-3xl font-black text-slate-900 dark:text-white">2</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="p-2 bg-emerald-50 rounded-lg text-emerald-500"><span class="material-symbols-outlined">verified</span></div>
-                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">98%</span>
-                    </div>
-                    <p class="text-sm text-slate-500 uppercase tracking-wider">Cumplimiento</p>
-                    <p class="text-3xl font-black text-slate-900 dark:text-white">98%</p>
-                </div>
+            <div id="dashboard-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Stats generated dynamically -->
             </div>
-
-            <!-- Main Content -->
             <div class="grid lg:grid-cols-3 gap-8">
-                <!-- Recent Scans -->
                 <div class="lg:col-span-2">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white">Escaneos Recientes</h3>
                         <button onclick="navigateTo('history')" class="text-primary text-sm font-bold hover:underline">Ver Todos</button>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="divide-y divide-slate-100">
-                            <div onclick="showChemicalDetail(0)" class="flex items-center gap-4 p-4 hover:bg-slate-50 cursor-pointer transition-colors">
-                                <img src="acido sulfurico.png" class="size-12 rounded-xl object-contain bg-red-100" alt="Ácido Sulfúrico" onerror="this.style.display='none'">
-                                <span class="size-12 rounded-xl bg-red-100 flex items-center justify-center text-2xl">🧪</span>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-slate-900">Ácido Sulfúrico 98%</h4>
-                                    <p class="text-sm text-slate-500">Zona Industrial A • Hace 5 min</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Alto Riesgo</span>
-                            </div>
-                            <div onclick="showChemicalDetail(1)" class="flex items-center gap-4 p-4 hover:bg-slate-50 cursor-pointer transition-colors">
-                                <img src="Hipoclorito de Sodio.png" class="size-12 rounded-xl object-contain bg-orange-100" alt="Hipoclorito" onerror="this.style.display='none'">
-                                <span class="size-12 rounded-xl bg-orange-100 flex items-center justify-center text-2xl">🧴</span>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-slate-900">Hipoclorito de Sodio</h4>
-                                    <p class="text-sm text-slate-500">Planta Tratamiento • Hace 23 min</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">Medio Riesgo</span>
-                            </div>
-                            <div onclick="showChemicalDetail(2)" class="flex items-center gap-4 p-4 hover:bg-slate-50 cursor-pointer transition-colors">
-                                <img src="acetona.png" class="size-12 rounded-xl object-contain bg-blue-100" alt="Acetona" onerror="this.style.display='none'">
-                                <span class="size-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl">💨</span>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-slate-900">Acetona Técnica</h4>
-                                    <p class="text-sm text-slate-500">Laboratorio Q2 • Hace 1 hora</p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Inflamable</span>
-                            </div>
-                        </div>
+                    <div id="recent-scans" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <!-- Recent scans generated dynamically -->
                     </div>
                 </div>
-
-                <!-- Quick Actions -->
                 <div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Acciones Rápidas</h3>
                     <div class="space-y-4">
@@ -173,24 +112,22 @@
                                 <p class="text-sm text-blue-200">Escanear producto químico</p>
                             </div>
                         </button>
-                        
                         <button onclick="navigateTo('chemicals')" class="w-full bg-white dark:bg-slate-900 border border-slate-200 p-4 rounded-xl flex items-center gap-4 hover:bg-slate-50 transition-all">
                             <div class="size-12 bg-slate-100 rounded-xl flex items-center justify-center text-primary">
                                 <span class="material-symbols-outlined text-3xl">inventory_2</span>
                             </div>
                             <div class="text-left">
                                 <p class="font-bold text-slate-900 dark:text-white">Base de Datos</p>
-                                <p class="text-sm text-slate-500">3 químicos registrados</p>
+                                <p id="chemical-count-dashboard" class="text-sm text-slate-500">0 químicos registrados</p>
                             </div>
                         </button>
-
                         <button onclick="navigateTo('epp')" class="w-full bg-white dark:bg-slate-900 border border-slate-200 p-4 rounded-xl flex items-center gap-4 hover:bg-slate-50 transition-all">
                             <div class="size-12 bg-slate-100 rounded-xl flex items-center justify-center text-primary">
                                 <span class="material-symbols-outlined text-3xl">health_and_safety</span>
                             </div>
                             <div class="text-left">
                                 <p class="font-bold text-slate-900 dark:text-white">Catálogo EPP</p>
-                                <p class="text-sm text-slate-500">12 equipos disponibles</p>
+                                <p id="epp-count-dashboard" class="text-sm text-slate-500">0 equipos disponibles</p>
                             </div>
                         </button>
                     </div>
@@ -199,37 +136,22 @@
         </div>
     </div>
 
-    <!-- ========== SCANNER ========== -->
+    <!-- SCANNER -->
     <div id="screen-scanner" class="screen">
         <div class="max-w-5xl mx-auto px-6 py-8">
-            
             <div class="text-center mb-6">
                 <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Escáner de Productos Químicos</h1>
-                <p class="text-slate-500 mt-2">Apunte la cámara a la etiqueta del producto para identificar riesgos y EPP requerido</p>
+                <p class="text-slate-500 mt-2">Seleccione un producto para ver su información de seguridad</p>
             </div>
-
-            <!-- Camera Simulation -->
             <div class="relative w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden mb-6">
                 <div class="absolute inset-0 bg-cover bg-center opacity-60" style="background-image: url('https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=1200');"></div>
-                
-                <!-- Camera UI -->
                 <div class="absolute inset-0 flex flex-col justify-between p-6">
                     <div class="flex justify-between">
                         <div class="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-2 text-white text-xs font-medium">
                             <span class="size-2 bg-red-500 rounded-full animate-pulse"></span>
                             CÁMARA ACTIVA
                         </div>
-                        <div class="flex gap-2">
-                            <button class="size-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20">
-                                <span class="material-symbols-outlined">flash_on</span>
-                            </button>
-                            <button class="size-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20">
-                                <span class="material-symbols-outlined">cameraswitch</span>
-                            </button>
-                        </div>
                     </div>
-
-                    <!-- Scan Frame -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div class="relative w-3/4 h-2/3 border-2 border-primary/60 rounded-2xl">
                             <div class="absolute -top-0.5 -left-0.5 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-xl"></div>
@@ -237,19 +159,10 @@
                             <div class="absolute -bottom-0.5 -left-0.5 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-xl"></div>
                             <div class="absolute -bottom-0.5 -right-0.5 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-xl"></div>
                             <div class="absolute w-full h-0.5 bg-primary top-0 scan-animation"></div>
-                            
-                            <!-- AR Tags -->
-                            <div class="absolute -top-8 left-4 bg-primary/90 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg">
-                                CAS: 7664-93-9
-                            </div>
-                            <div class="absolute -bottom-8 right-4 bg-red-500/90 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">warning</span> GHS05
-                            </div>
                         </div>
                     </div>
-
                     <div class="flex flex-col items-center gap-3">
-                        <p class="text-white/80 text-sm font-medium bg-black/40 px-4 py-1 rounded-full">Mantenga quieto para escanear...</p>
+                        <p class="text-white/80 text-sm font-medium bg-black/40 px-4 py-1 rounded-full">Seleccione un químico abajo para simular escaneo</p>
                         <button onclick="simulateScan()" class="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-all">
                             <span class="material-symbols-outlined">center_focus_strong</span>
                             Simular Escaneo
@@ -257,205 +170,57 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Quick Select -->
             <div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200">
                 <h3 class="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">quick_reference</span>
                     Selección Rápida de Producto
                 </h3>
-                <div class="grid grid-cols-3 gap-4">
-                    <button onclick="simulateScan(0)" class="chemical-card bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-xl p-5 text-center hover:border-red-400">
-                        <img src="acido sulfurico.png" class="w-16 h-16 mx-auto mb-3 object-contain" alt="Ácido Sulfúrico" onerror="this.style.display='none'">
-                        <span class="text-5xl mb-3 block">🧪</span>
-                        <p class="font-bold text-slate-900">Ácido Sulfúrico</p>
-                        <p class="text-xs text-slate-500 mt-1">CAS: 7664-93-9</p>
-                    </button>
-                    <button onclick="simulateScan(1)" class="chemical-card bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl p-5 text-center hover:border-orange-400">
-                        <img src="Hipoclorito de Sodio.png" class="w-16 h-16 mx-auto mb-3 object-contain" alt="Hipoclorito" onerror="this.style.display='none'">
-                        <span class="text-5xl mb-3 block">🧴</span>
-                        <p class="font-bold text-slate-900">Hipoclorito Sodio</p>
-                        <p class="text-xs text-slate-500 mt-1">CAS: 7681-52-9</p>
-                    </button>
-                    <button onclick="simulateScan(2)" class="chemical-card bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-5 text-center hover:border-blue-400">
-                        <img src="acetona.png" class="w-16 h-16 mx-auto mb-3 object-contain" alt="Acetona" onerror="this.style.display='none'">
-                        <span class="text-5xl mb-3 block">💨</span>
-                        <p class="font-bold text-slate-900">Acetona</p>
-                        <p class="text-xs text-slate-500 mt-1">CAS: 67-64-1</p>
-                    </button>
+                <div id="scanner-quick-select" class="grid grid-cols-3 gap-4">
+                    <!-- Quick select buttons generated dynamically -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ========== CHEMICALS LIST ========== -->
-    <!-- ===========================================================
-         INSTRUCCIONES PARA AGREGAR NUEVOS QUÍMICOS:
-         1. Agregar card de químico en la lista ( ABAJO DE ESTE COMENTARIO )
-         2. Agregar datos del químico en el array 'chemicals' JavaScript
-         3. Si agregas más de 3 químicos, ajustar los tabs del scanner
-         =========================================================== -->
+    <!-- CHEMICALS LIST -->
     <div id="screen-chemicals" class="screen">
         <div class="max-w-7xl mx-auto px-6 lg:px-40 py-8">
             <div class="mb-8">
                 <h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Base de Datos de Químicos</h1>
-                <p class="text-slate-500 mt-2">3 productos químicos registrados • 100% offline</p>
+                <p id="chemical-count-text" class="text-slate-500 mt-2">0 productos químicos registrados • 100% offline</p>
             </div>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- ÁCIDO SULFÚRICO -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden border border-slate-200">
-                    <div class="bg-gradient-to-r from-red-600 to-red-800 p-6">
-                        <div class="flex items-center gap-4">
-                            <img src="acido sulfurico.png" class="w-16 h-16 object-contain bg-white/20 rounded-xl" alt="Ácido Sulfúrico" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden items-center">🧪</span>
-                            <div>
-                                <h3 class="text-white text-xl font-black">Ácido Sulfúrico</h3>
-                                <p class="text-red-200 text-sm">H₂SO₄ • CAS: 7664-93-9</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">CORROSIVO</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">ALTO RIESGO</span>
-                        </div>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Causa quemaduras graves. Altamente corrosivo. Puede ser fatal si se inhala o ingiere.</p>
-                        
-                        <div class="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                            <span class="material-symbols-outlined text-primary">inventory</span>
-                            <span>4 EPP requeridos</span>
-                        </div>
-
-                        <div class="space-y-2 mb-4">
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-blue-100 rounded flex items-center justify-center text-sm">🪖</span> Careta completa</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-green-100 rounded flex items-center justify-center text-sm">🧤</span> Guantes de butilo</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-orange-100 rounded flex items-center justify-center text-sm">🦺</span> Traje Hazmat A</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-purple-100 rounded flex items-center justify-center text-sm">😷</span> Respirador acid gas</div>
-                        </div>
-
-                        <button onclick="showChemicalDetail(0)" class="w-full bg-primary hover:bg-blue-600 text-white py-3 rounded-xl font-bold transition-colors">
-                            Ver Ficha Completa
-                        </button>
-                    </div>
-                </div>
-
-                <!-- HIPOCLORITO DE SODIO -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden border border-slate-200">
-                    <div class="bg-gradient-to-r from-orange-500 to-amber-600 p-6">
-                        <div class="flex items-center gap-4">
-                            <img src="Hipoclorito de Sodio.png" class="w-16 h-16 object-contain bg-white/20 rounded-xl" alt="Hipoclorito de Sodio" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden items-center">🧴</span>
-                            <div>
-                                <h3 class="text-white text-xl font-black">Hipoclorito de Sodio</h3>
-                                <p class="text-orange-200 text-sm">NaOCl • CAS: 7681-52-9</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">OXIDANTE</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">MEDIO RIESGO</span>
-                        </div>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Puede liberar gas cloro fatal si se mezcla con ácidos. Irritante para piel y ojos.</p>
-                        
-                        <div class="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                            <span class="material-symbols-outlined text-primary">inventory</span>
-                            <span>3 EPP requeridos</span>
-                        </div>
-
-                        <div class="space-y-2 mb-4">
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-blue-100 rounded flex items-center justify-center text-sm">🥽</span> Gafas seguridad</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-green-100 rounded flex items-center justify-center text-sm">🧤</span> Guantes neopreno</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-yellow-100 rounded flex items-center justify-center text-sm">👕</span> Delantal químico</div>
-                        </div>
-
-                        <button onclick="showChemicalDetail(1)" class="w-full bg-primary hover:bg-blue-600 text-white py-3 rounded-xl font-bold transition-colors">
-                            Ver Ficha Completa
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ACETONA -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden border border-slate-200">
-                    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
-                        <div class="flex items-center gap-4">
-                            <img src="acetona.png" class="w-16 h-16 object-contain bg-white/20 rounded-xl" alt="Acetona" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden items-center">💨</span>
-                            <div>
-                                <h3 class="text-white text-xl font-black">Acetona</h3>
-                                <p class="text-blue-200 text-sm">C₃H₆O • CAS: 67-64-1</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">INFLAMABLE</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">BAJO RIESGO</span>
-                        </div>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Líquido altamente inflamable. Causa irritación ocular. Puede causar somnolencia.</p>
-                        
-                        <div class="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                            <span class="material-symbols-outlined text-primary">inventory</span>
-                            <span>4 EPP requeridos</span>
-                        </div>
-
-                        <div class="space-y-2 mb-4">
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-blue-100 rounded flex items-center justify-center text-sm">🥽</span> Gafas anti-splash</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-green-100 rounded flex items-center justify-center text-sm">🧤</span> Guantes nitrilo</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-orange-100 rounded flex items-center justify-center text-sm">👕</span> Bata laboratorio</div>
-                            <div class="flex items-center gap-2 text-sm"><span class="size-6 bg-purple-100 rounded flex items-center justify-center text-sm">😷</span> Respirador vapores</div>
-                        </div>
-
-                        <button onclick="showChemicalDetail(2)" class="w-full bg-primary hover:bg-blue-600 text-white py-3 rounded-xl font-bold transition-colors">
-                            Ver Ficha Completa
-                        </button>
-                    </div>
-                </div>
-
-                <!-- =====================================================
-                     INCLUDE NEW CHEMICAL CARD HERE
-                     Copia la estructura de un card acima y pegala aqui
-                     ===================================================== -->
-
+            <div id="chemicals-grid" class="grid md:grid-cols-3 gap-6">
+                <!-- Chemical cards generated dynamically -->
             </div>
         </div>
     </div>
 
-    <!-- ========== CHEMICAL DETAIL (SDS) ========== -->
+    <!-- CHEMICAL DETAIL -->
     <div id="screen-detail" class="screen">
         <div class="max-w-7xl mx-auto px-6 lg:px-40 py-8">
-            
-            <!-- Breadcrumb -->
             <div class="flex items-center gap-2 text-sm text-slate-500 mb-6">
                 <a href="#" onclick="navigateTo('chemicals'); return false;" class="hover:text-primary">Químicos</a>
                 <span class="material-symbols-outlined text-sm">chevron_right</span>
-                <span id="detail-name" class="text-slate-900 font-medium">Ácido Sulfúrico</span>
+                <span id="detail-name" class="text-slate-900 font-medium">-</span>
             </div>
-
-            <!-- Header Card -->
             <div id="detail-header" class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 mb-6 text-white">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center gap-4">
-                        <span id="detail-icon" class="text-6xl">🧪</span>
+                        <img id="detail-icon-img" src="" class="w-16 h-16 object-contain hidden" alt="">
+                        <span id="detail-icon" class="text-6xl">-</span>
                         <div>
-                            <h1 id="detail-title" class="text-3xl font-black">Ácido Sulfúrico 98%</h1>
-                            <p id="detail-cas" class="text-red-200 mt-1">CAS: 7664-93-9 • H₂SO₄</p>
+                            <h1 id="detail-title" class="text-3xl font-black">-</h1>
+                            <p id="detail-cas" class="text-red-200 mt-1">-</p>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span id="detail-badge1" class="px-4 py-2 rounded-full text-sm font-bold bg-white/20">CORROSIVO</span>
-                        <span id="detail-badge2" class="px-4 py-2 rounded-full text-sm font-bold bg-red-900/50">ALTO RIESGO</span>
+                        <span id="detail-badge1" class="px-4 py-2 rounded-full text-sm font-bold bg-white/20">-</span>
+                        <span id="detail-badge2" class="px-4 py-2 rounded-full text-sm font-bold bg-red-900/50">-</span>
                     </div>
                 </div>
             </div>
-
             <div class="grid lg:grid-cols-12 gap-6">
-                
-                <!-- Main Content -->
                 <div class="lg:col-span-8 space-y-6">
-                    
-                    <!-- EPP Section - MAIN FEATURE -->
                     <div id="epp-section" class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 shadow-xl">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="size-14 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
@@ -466,60 +231,33 @@
                                 <p class="text-blue-200 text-sm">EPP OBLIGATORIO para trabajar con este químico</p>
                             </div>
                         </div>
-                        
-                        <!-- =====================================================
-                             INCLUDE NEW EPP IMAGE GRID HERE
-                             Los EPP se generan dinamicamente desde el array 'chemicals'
-                             Para cambiar iconos por imagenes reales, modifica la funcion
-                             showChemicalDetail() en la seccion JavaScript
-                             ===================================================== -->
                         <div id="epp-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <!-- EPP cards will be inserted here -->
+                            <!-- EPP cards generated dynamically -->
                         </div>
                     </div>
-
-                    <!-- Hazards -->
                     <div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200">
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-red-500">warning</span>
                             Peligros Identificados
                         </h3>
-                        <div id="detail-hazards" class="p-4 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 text-sm text-red-900 leading-relaxed">
-                            Cargando información de peligros...
-                        </div>
+                        <div id="detail-hazards" class="p-4 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 text-sm text-red-900 leading-relaxed">-</div>
                     </div>
-
-                    <!-- First Aid -->
                     <div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200">
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-green-500">medical_services</span>
                             Primeros Auxilios
                         </h3>
-                        <div id="detail-firstaid" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            Cargando...
-                        </div>
+                        <div id="detail-firstaid" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">-</div>
                     </div>
-
-                    <!-- Storage -->
                     <div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200">
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-blue-500">inventory_2</span>
                             Almacenamiento
                         </h3>
-                        <p id="detail-storage" class="text-sm text-slate-600 dark:text-slate-300">Cargando información de almacenamiento...</p>
+                        <p id="detail-storage" class="text-sm text-slate-600 dark:text-slate-300">-</p>
                     </div>
                 </div>
-
-                <!-- Sidebar -->
                 <div class="lg:col-span-4 space-y-6">
-                    
-                    <!-- =====================================================
-                         INCLUDE NEW FDS PDF DOWNLOAD BUTTON HERE
-                         El boton de descarga usa currentChemical.fdsFile
-                         Para cambiar a descarga real de PDF, modifica la funcion
-                         downloadFDS() en la seccion JavaScript
-                         ===================================================== -->
-                    <!-- Download FDS -->
                     <div class="bg-white dark:bg-slate-900 rounded-xl shadow-lg overflow-hidden sticky top-24">
                         <div class="bg-gradient-to-r from-primary to-blue-600 px-5 py-4">
                             <h3 class="text-white font-bold flex items-center gap-2">
@@ -549,8 +287,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- PPE Detail List -->
                     <div class="bg-white dark:bg-slate-900 rounded-xl shadow-lg overflow-hidden">
                         <div class="bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-4">
                             <h3 class="text-white font-bold flex items-center gap-2">
@@ -559,11 +295,9 @@
                             </h3>
                         </div>
                         <div id="epp-list" class="p-4 space-y-3">
-                            <!-- PPE list will be inserted here -->
+                            <!-- EPP list generated dynamically -->
                         </div>
                     </div>
-
-                    <!-- Emergency Contacts -->
                     <div class="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-5">
                         <h4 class="font-bold text-slate-900 dark:text-white mb-4">Contactos de Emergencia</h4>
                         <div class="space-y-3">
@@ -601,254 +335,30 @@
         </div>
     </div>
 
-    <!-- ========== EPP CATALOG ========== -->
-    <!-- ===========================================================
-         INSTRUCCIONES PARA AGREGAR NUEVOS EPP:
-         1. Agregar nuevo tab en la lista de tabs ( ABAJO DE ESTE COMENTARIO )
-         2. Agregar el contenido del tab con las cards de EPP
-         3. Agregar los datos del EPP en el array 'chemicals'
-         4. Si agregas más de 3 tabs, ajustar el JavaScript showEPPTab()
-         =========================================================== -->
+    <!-- EPP CATALOG -->
     <div id="screen-epp" class="screen">
         <div class="max-w-7xl mx-auto px-6 lg:px-40 py-8">
             <div class="mb-8">
                 <h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Catálogo de EPP</h1>
                 <p class="text-slate-500 mt-2">Equipos de protección personal requeridos por sustancia química</p>
             </div>
-
-            <!-- EPP by Chemical Tabs -->
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-                <button onclick="showEPPTab(0)" id="epp-tab-0" class="px-5 py-2 rounded-full font-bold text-sm bg-primary text-white whitespace-nowrap">Ácido Sulfúrico</button>
-                <button onclick="showEPPTab(1)" id="epp-tab-1" class="px-5 py-2 rounded-full font-bold text-sm bg-slate-100 text-slate-600 whitespace-nowrap">Hipoclorito</button>
-                <button onclick="showEPPTab(2)" id="epp-tab-2" class="px-5 py-2 rounded-full font-bold text-sm bg-slate-100 text-slate-600 whitespace-nowrap">Acetona</button>
-                <!-- INCLUDE NEW EPP TAB HERE -->
+            <div id="epp-tabs" class="flex gap-2 mb-6 overflow-x-auto pb-2">
+                <!-- EPP tabs generated dynamically -->
             </div>
-
-            <!-- EPP Content - ÁCIDO SULFÚRICO -->
-            <div id="epp-content-0" class="block">
-                <div class="bg-gradient-to-r from-red-600 to-red-800 rounded-xl p-4 mb-6 text-white">
-                    <div class="flex items-center gap-3">
-                        <img src="acido sulfurico.png" class="w-16 h-16 object-contain bg-white/20 rounded-xl" alt="Ácido Sulfúrico" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <span class="text-4xl hidden">🧪</span>
-                        <div>
-                            <h2 class="text-xl font-black">Ácido Sulfúrico H₂SO₄</h2>
-                            <p class="text-red-200 text-sm">CAS: 7664-93-9 • Corrosivo</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- INCLUDE NEW EPP CARD FOR ACID HERE -->
-<div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-blue-200 text-center">
-                        <div class="size-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="acido sulfurico.png" class="size-16 object-contain" alt="Careta" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">🪖</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Careta Completa</h3>
-                        <p class="text-xs text-slate-500 mb-3">Protección facial total contra salpicaduras ácidas</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-green-200 text-center">
-                        <div class="size-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="acido sulfurico.png" class="size-16 object-contain" alt="Guantes" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">🧤</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Guantes de Butilo</h3>
-                        <p class="text-xs text-slate-500 mb-3">8mm espesor, resistencia ácida superior</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-orange-200 text-center">
-                        <div class="size-20 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="acido sulfurico.png" class="size-16 object-contain" alt="Traje" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">🦺</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Traje Hazmat Nivel A</h3>
-                        <p class="text-xs text-slate-500 mb-3">Máxima protección contra químicos peligrosos</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-purple-200 text-center">
-                        <div class="size-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="acido sulfurico.png" class="size-16 object-contain" alt="Respirador" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">😷</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Respirador Acid Gas</h3>
-                        <p class="text-xs text-slate-500 mb-3">Cartucho para vapores ácidos y gases</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Careta Completa</h3>
-                        <p class="text-xs text-slate-500 mb-3">Protección facial total contra salpicaduras ácidas</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-green-200 text-center">
-                        <div class="size-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-5xl">🧤</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Guantes de Butilo</h3>
-                        <p class="text-xs text-slate-500 mb-3">8mm espesor, resistencia química superior</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-orange-200 text-center">
-                        <div class="size-20 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-5xl">🦺</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Traje Hazmat Nivel A</h3>
-                        <p class="text-xs text-slate-500 mb-3">Máxima protección contra químicos peligrosos</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-purple-200 text-center">
-                        <div class="size-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-5xl">😷</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Respirador Acid Gas</h3>
-                        <p class="text-xs text-slate-500 mb-3">Cartucho para vapores ácidos y gases</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- EPP Content - HIPOCLORITO -->
-            <div id="epp-content-1" class="hidden">
-                <div class="bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl p-4 mb-6 text-white">
-                    <div class="flex items-center gap-3">
-                        <img src="Hipoclorito de Sodio.png" class="w-16 h-16 object-contain bg-white/20 rounded-xl" alt="Hipoclorito" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <span class="text-4xl hidden">🧴</span>
-                        <div>
-                            <h2 class="text-xl font-black">Hipoclorito de Sodio NaOCl</h2>
-                            <p class="text-orange-200 text-sm">CAS: 7681-52-9 • Oxidante</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- INCLUDE NEW EPP CARD FOR HYPOCHLORITE HERE -->
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-blue-200 text-center">
-                        <div class="size-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="Hipoclorito de Sodio.png" class="size-16 object-contain" alt="Gafas" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">🥽</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Gafas de Seguridad</h3>
-                        <p class="text-xs text-slate-500 mb-3">Con ventilación indirecta, anti-splash</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-green-200 text-center">
-                        <div class="size-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="Hipoclorito de Sodio.png" class="size-16 object-contain" alt="Guantes" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">🧤</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Guantes de Neopreno</h3>
-                        <p class="text-xs text-slate-500 mb-3">5mm espesor, aislamiento químico</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-yellow-200 text-center">
-                        <div class="size-20 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="Hipoclorito de Sodio.png" class="size-16 object-contain" alt="Delantal" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">👕</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Delantal Químico</h3>
-                        <p class="text-xs text-slate-500 mb-3">Resistente a salpicaduras</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-slate-200 text-center">
-                        <div class="size-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <img src="Hipoclorito de Sodio.png" class="size-16 object-contain" alt="Sin Respirador" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <span class="text-5xl hidden">➖</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Sin Respirador</h3>
-                        <p class="text-xs text-slate-500 mb-3">No requerido para uso normal</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">info</span> NO REQUERIDO
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- EPP Content - ACETONA -->
-            <div id="epp-content-2" class="hidden">
-                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4 mb-6 text-white">
-                    <div class="flex items-center gap-3">
-                        <span class="text-4xl">💨</span>
-                        <div>
-                            <h2 class="text-xl font-black">Acetona C₃H₆O</h2>
-                            <p class="text-blue-200 text-sm">CAS: 67-64-1 • Altamente Inflamable</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- INCLUDE NEW EPP CARD FOR ACETONE HERE -->
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-blue-200 text-center">
-                        <div class="size-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-5xl">🥽</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Gafas Anti-Salpicaduras</h3>
-                        <p class="text-xs text-slate-500 mb-3">Protección ocular completa</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-green-200 text-center">
-                        <div class="size-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-5xl">🧤</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Guantes de Nitrilo</h3>
-                        <p class="text-xs text-slate-500 mb-3">Resistentes a solventes orgánicos</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-orange-200 text-center">
-                        <div class="size-20 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-5xl">👕</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Bata de Laboratorio</h3>
-                        <p class="text-xs text-slate-500 mb-3">Algodón tratado retardante</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
-                        </span>
-                    </div>
-                    <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-purple-200 text-center">
-                        <div class="size-20 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-5xl">😷</span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white mb-1">Respirador Vapores</h3>
-                        <p class="text-xs text-slate-500 mb-3">Solo si TWA excedido</p>
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-100 px-3 py-1 rounded-full">
-                            <span class="material-symbols-outlined text-sm">warning</span> SI TWA EXCEDIDO
-                        </span>
-                    </div>
-                </div>
+            <div id="epp-contents">
+                <!-- EPP contents generated dynamically -->
             </div>
         </div>
     </div>
 
-    <!-- ========== HISTORY ========== -->
+    <!-- HISTORY -->
     <div id="screen-history" class="screen">
         <div class="max-w-7xl mx-auto px-6 lg:px-40 py-8">
             <div class="mb-8">
                 <h1 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Historial de Escaneos</h1>
                 <p class="text-slate-500 mt-2">Registro de todos los productos químicos escaneados</p>
             </div>
-
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div id="history-table" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
@@ -860,31 +370,8 @@
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Acción</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <tr onclick="showChemicalDetail(0)" class="hover:bg-slate-50 cursor-pointer">
-                            <td class="px-6 py-4"><span class="text-sm font-medium text-slate-900">Oct 29, 2024</span><br><span class="text-xs text-slate-500">14:32</span></td>
-                            <td class="px-6 py-4"><span class="font-bold text-slate-900">Ácido Sulfúrico 98%</span></td>
-                            <td class="px-6 py-4"><span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded">7664-93-9</span></td>
-                            <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">ALTO</span></td>
-                            <td class="px-6 py-4 text-sm text-slate-500">Zona Industrial A</td>
-                            <td class="px-6 py-4"><button class="text-primary text-sm font-bold hover:underline">Ver</button></td>
-                        </tr>
-                        <tr onclick="showChemicalDetail(1)" class="hover:bg-slate-50 cursor-pointer">
-                            <td class="px-6 py-4"><span class="text-sm font-medium text-slate-900">Oct 29, 2024</span><br><span class="text-xs text-slate-500">11:15</span></td>
-                            <td class="px-6 py-4"><span class="font-bold text-slate-900">Hipoclorito de Sodio</span></td>
-                            <td class="px-6 py-4"><span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded">7681-52-9</span></td>
-                            <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">MEDIO</span></td>
-                            <td class="px-6 py-4 text-sm text-slate-500">Planta Tratamiento</td>
-                            <td class="px-6 py-4"><button class="text-primary text-sm font-bold hover:underline">Ver</button></td>
-                        </tr>
-                        <tr onclick="showChemicalDetail(2)" class="hover:bg-slate-50 cursor-pointer">
-                            <td class="px-6 py-4"><span class="text-sm font-medium text-slate-900">Oct 28, 2024</span><br><span class="text-xs text-slate-500">16:45</span></td>
-                            <td class="px-6 py-4"><span class="font-bold text-slate-900">Acetona Técnica</span></td>
-                            <td class="px-6 py-4"><span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded">67-64-1</span></td>
-                            <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">INFLAMABLE</span></td>
-                            <td class="px-6 py-4 text-sm text-slate-500">Laboratorio Q2</td>
-                            <td class="px-6 py-4"><button class="text-primary text-sm font-bold hover:underline">Ver</button></td>
-                        </tr>
+                    <tbody id="history-body" class="divide-y divide-slate-100">
+                        <!-- History rows generated dynamically -->
                     </tbody>
                 </table>
             </div>
@@ -896,7 +383,7 @@
         <div class="size-24 flex items-center justify-center rounded-full bg-primary/20 mb-6 animate-pulse">
             <span class="material-symbols-outlined text-5xl text-primary">document_scanner</span>
         </div>
-        <h3 class="text-white text-xl font-bold mb-2">Procesando Imagen...</h3>
+        <h3 class="text-white text-xl font-bold mb-2">Procesando...</h3>
         <p id="ocr-status" class="text-slate-400 text-sm mb-4">Iniciando OCR...</p>
         <div class="flex gap-2">
             <div class="size-3 bg-primary rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
@@ -910,179 +397,170 @@
         <span class="material-symbols-outlined text-2xl">check_circle</span>
         <div>
             <p class="font-bold">FDS descargada</p>
-            <p id="fds-file-name" class="text-sm text-green-100">FDS_Acido_Sulfurico.pdf</p>
+            <p id="fds-file-name" class="text-sm text-green-100">-.pdf</p>
         </div>
     </div>
 
     <script>
-        /* ================================================================
-           INSTRUCCIONES PARA AGREGAR NUEVOS QUÍMICOS EN JAVASCRIPT:
-           
-           1. Agregar nuevo objeto en el array 'chemicals' ( ABAJO )
-           2. Agregar boton en la lista del scanner
-           3. Agregar card en la seccion QUIMICOS
-           4. Agregar tab y contenido en la seccion EPP CATALOG
-           5. Los EPP se muestran automaticamente desde el array 'epp'
-           
-           ESTRUCTURA DE UN NUEVO QUÍMICO:
-           {
-               id: 3,                          // ID único (incrementar)
-               name: 'Nombre del Químico',      // Nombre comercial
-               icon: '🔬',                       // Emoji o usar img tag
-               cas: 'XXXXX-XX-X',               // Número CAS
-               formula: 'XYZ',                    // Fórmula química
-               riskLevel: 'Alto',                // Alto/Medio/Bajo
-               hazardClass: 'TÓXICO',            // Clase de peligro
-               gradient: 'from-purple-600 to-purple-800',  // Colores header
-               hazards: 'Descripción de peligros...',
-               firstAid: {
-                   inhalation: '...',
-                   skin: '...',
-                   eyes: '...',
-                   ingestion: '...'
-               },
-               storage: '...',
-               epp: [
-                   { name: 'Nombre EPP', icon: '🧤', desc: 'Descripción', color: 'blue' },
-                   // hasta 4 EPP
-               ],
-               fdsFile: 'FDS_Nombre_Quimico.pdf'  // Nombre del PDF en carpeta
-           }
-           ================================================================ */
-
-        // Chemical Database with Full Data
-        const chemicals = [
-            {
-                id: 0,
-                name: 'Ácido Sulfúrico 98%',
-                imageFile: 'acido sulfurico.png',
-                icon: '🧪',
-                cas: '7664-93-9',
-                formula: 'H₂SO₄',
-                riskLevel: 'Alto',
-                hazardClass: 'CORROSIVO',
-                gradient: 'from-red-600 to-red-800',
-                hazards: 'Causa quemaduras graves en piel y ojos. Puede ser corrosivo para los metales. La ingestión causa daño severo al tracto gastrointestinal. La inhalación de vapores puede causar irritación respiratoria severa. Altamente corrosivo. Contacto puede causar ceguera permanente.',
-                firstAid: {
-                    inhalation: 'Transportar al aire fresco. Si no respira, dar respiración artificial. Buscar atención médica inmediata.',
-                    skin: 'Retirar ropa contaminada. Lavar inmediatamente con agua abundante durante 20+ minutos. Aplicar solución de bicarbonato de sodio.',
-                    eyes: 'Enjuagar con agua durante 15-20 minutos manteniendo párpados abiertos. Buscar atención oftalmológica inmediatamente.',
-                    ingestion: 'NO provocar vómito. Enjuagar boca. No dar nada por boca. Buscar atención médica inmediata.'
-                },
-                storage: 'Almacenar en área bien ventilada, fresco y seco. Mantener contenedor tightly cerrado. Separado de materiales combustibles y bases. Usar contenedor de material resistente a ácidos. Ubicar en áreas con contención para derrames.',
-                epp: [
-                    { name: 'Careta Completa', icon: '🪖', desc: 'Protección facial total contra salpicaduras', color: 'blue' },
-                    { name: 'Guantes de Butilo', icon: '🧤', desc: '8mm espesor, resistencia ácida superior', color: 'green' },
-                    { name: 'Traje Hazmat A', icon: '🦺', desc: 'Nivel A, máxima protección química', color: 'orange' },
-                    { name: 'Respirador Acid Gas', icon: '😷', desc: 'Cartucho para vapores ácidos', color: 'purple' }
-                ],
-                fdsFile: 'FDS_acido sulfurico.pdf'
-            },
-            {
-                id: 1,
-                name: 'Hipoclorito de Sodio',
-                imageFile: 'Hipoclorito de Sodio.png',
-                icon: '🧴',
-                cas: '7681-52-9',
-                formula: 'NaOCl',
-                riskLevel: 'Medio',
-                hazardClass: 'OXIDANTE',
-                gradient: 'from-orange-500 to-amber-600',
-                hazards: 'Puede intensificar incendios. Causa irritación cutánea severa. Muy tóxico para organismos acuáticos. El contacto con ácidos libera gas cloro - POTENCIALMENTE FATAL. Los vapores pueden causar irritación respiratoria.',
-                firstAid: {
-                    inhalation: 'Salir al aire fresco. Si hay dificultad respiratoria, administrar oxígeno. Llamar a emergencias si persisten síntomas.',
-                    skin: 'Lavarse inmediatamente con agua y jabón. Enjuagar con solución de bisulfito de sodio si disponible.',
-                    eyes: 'Enjuagar con agua durante 15 minutos. Retirar lentes de contacto. Buscar atención médica.',
-                    ingestion: 'NO provocar vómito. Beber leche o agua. Buscar atención médica inmediata. No administrar carbón activado.'
-                },
-                storage: 'Almacenar en lugar fresco y bien ventilado. Mantener alejado de ácidos y materiales incompatibles. Proteger de la luz solar directa. El contenedor debe estar etiquetado claramente. Tener sistema de contención para derrames.',
-                epp: [
-                    { name: 'Gafas de Seguridad', icon: '🥽', desc: 'Ventilación indirecta obligatoria', color: 'blue' },
-                    { name: 'Guantes de Neopreno', icon: '🧤', desc: '5mm espesor, aislamiento químico', color: 'green' },
-                    { name: 'Delantal Químico', icon: '👕', desc: 'Resistente a salpicaduras', color: 'yellow' },
-                    { name: 'Sin Respirador', icon: '➖', desc: 'No requerido para uso normal', color: 'slate' }
-                ],
-                fdsFile: 'FDS_Hipoclorito de Sodio.pdf'
-            },
-            {
-                id: 2,
-                name: 'Acetona Técnica',
-                imageFile: 'acetona.png',
-                icon: '💨',
-                cas: '67-64-1',
-                formula: 'C₃H₆O',
-                riskLevel: 'Inflamable',
-                hazardClass: 'INFLAMABLE',
-                gradient: 'from-blue-500 to-indigo-600',
-                hazards: 'Líquido y vapores extremadamente inflamables. Puede formar mezclas explosivas con aire. Causa irritación ocular grave. Puede causar somnolencia o mareos. La inhalación de vapores puede causar irritación del tracto respiratorio. Los vapores son más pesados que el aire.',
-                firstAid: {
-                    inhalation: 'Transportar al aire fresco. Si hay dificultad respiratoria, administrar oxígeno. Si está inconsciente, colocar en posición de recuperación.',
-                    skin: 'Lavarse con agua y jabón. En caso de congelación por derrame, no remover ropa congelada. Buscar atención médica si hay irritación.',
-                    eyes: 'Enjuagar con agua durante 15 minutos. Buscar atención médica si persiste irritación.',
-                    ingestion: 'NO inducir vómito. Enjuagar boca. Beber agua o leche. No dar nada a persona inconsciente. Buscar atención médica.'
-                },
-                storage: 'Almacenar en área fresca, bien ventilada, lejos de fuentes de ignición y calor. Contenedor debe estar tightly cerrado. Conectar a tierra durante transferencia para evitar carga estática. Almacenar en área específica para líquidos inflamables con contención.',
-                epp: [
-                    { name: 'Gafas Anti-Salpicaduras', icon: '🥽', desc: 'Protección ocular completa', color: 'blue' },
-                    { name: 'Guantes de Nitrilo', icon: '🧤', desc: 'Resistentes a solventes orgánicos', color: 'green' },
-                    { name: 'Bata de Laboratorio', icon: '👕', desc: 'Algodón tratado retardante', color: 'orange' },
-                    { name: 'Respirador Vapores', icon: '😷', desc: 'Solo si TWA excedido', color: 'purple' }
-                ],
-                fdsFile: 'FDS_Acetona.pdf'
-            }
-
-            /* =====================================================
-               INCLUDE NEW CHEMICAL HERE
-               Agrega una coma (,) después del último llave }
-               y pega tu nuevo objeto químico
-               
-               EJEMPLO:
-               ,
-               {
-                   id: 3,
-                   name: 'Nuevo Químico',
-                   icon: '🔬',
-                   cas: 'XXXXX-XX-X',
-                   formula: 'XYZ',
-                   riskLevel: 'Medio',
-                   hazardClass: 'IRRITANTE',
-                   gradient: 'from-green-500 to-green-700',
-                   hazards: '...',
-                   firstAid: { ... },
-                   storage: '...',
-                   epp: [ ... ],
-                   fdsFile: 'FDS_Nuevo_Quimico.pdf'
-               }
-               ===================================================== */
-        ];
-
+        let chemicals = [];
         let currentChemical = null;
 
-        // Navigation
+        async function loadChemicals() {
+            try {
+                const response = await fetch('chemicals.json');
+                const data = await response.json();
+                chemicals = data.chemicals || [];
+                initializeApp();
+            } catch (error) {
+                console.error('Error loading chemicals:', error);
+                document.getElementById('loading-screen').innerHTML = `
+                    <p class="text-red-500 mb-4">Error al cargar datos</p>
+                    <button onclick="loadChemicals()" class="bg-primary text-white px-4 py-2 rounded-lg">Reintentar</button>
+                `;
+            }
+        }
+
+        function initializeApp() {
+            document.getElementById('loading-screen').classList.add('hidden');
+            renderDashboard();
+            renderScanner();
+            renderChemicalsList();
+            renderEPPTabs();
+            renderHistory();
+        }
+
         function navigateTo(screen) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-' + screen).classList.add('active');
             window.scrollTo(0, 0);
         }
 
-        // Show Chemical Detail
+        function renderDashboard() {
+            const totalEPP = chemicals.reduce((sum, c) => sum + (c.epp?.length || 0), 0);
+            document.getElementById('chemical-count-dashboard').textContent = `${chemicals.length} químicos registrados`;
+            document.getElementById('epp-count-dashboard').textContent = `${totalEPP} equipos disponibles`;
+            document.getElementById('epp-count-dashboard').textContent = `${totalEPP} equipos disponibles`;
+
+            document.getElementById('recent-scans').innerHTML = chemicals.slice(0, 3).map((c, i) => `
+                <div onclick="showChemicalDetail(${i})" class="flex items-center gap-4 p-4 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <img src="assets/${c.image}" class="size-12 rounded-xl object-contain bg-slate-100" alt="${c.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <span class="size-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl hidden">🧪</span>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-slate-900">${c.name}</h4>
+                        <p class="text-sm text-slate-500">Hace ${(i + 1) * 5} min</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">${c.riskLevel}</span>
+                </div>
+            `).join('') || '<p class="p-4 text-slate-500">No hay escaneos recientes</p>';
+        }
+
+        function renderScanner() {
+            document.getElementById('scanner-quick-select').innerHTML = chemicals.map((c, i) => `
+                <button onclick="simulateScan(${i})" class="chemical-card bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 rounded-xl p-5 text-center hover:border-primary">
+                    <img src="assets/${c.image}" class="w-16 h-16 mx-auto mb-3 object-contain" alt="${c.name}" onerror="this.style.display='none'">
+                    <p class="font-bold text-slate-900">${c.name}</p>
+                    <p class="text-xs text-slate-500 mt-1">CAS: ${c.cas}</p>
+                </button>
+            `).join('');
+        }
+
+        function renderChemicalsList() {
+            document.getElementById('chemical-count-text').textContent = `${chemicals.length} productos químicos registrados • 100% offline`;
+            document.getElementById('chemicals-grid').innerHTML = chemicals.map((c, i) => `
+                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg overflow-hidden border border-slate-200">
+                    <div class="bg-gradient-to-r ${c.gradient} p-6">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/${c.image}" class="w-16 h-16 object-contain bg-white/20 rounded-xl" alt="${c.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <span class="text-5xl hidden">🧪</span>
+                            <div>
+                                <h3 class="text-white text-xl font-black">${c.name}</h3>
+                                <p class="text-white/80 text-sm">${c.formula} • CAS: ${c.cas}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">${c.hazardClass}</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">${c.riskLevel}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">${c.hazards.substring(0, 100)}...</p>
+                        <div class="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                            <span class="material-symbols-outlined text-primary">inventory</span>
+                            <span>${c.epp?.length || 0} EPP requeridos</span>
+                        </div>
+                        <button onclick="showChemicalDetail(${i})" class="w-full bg-primary hover:bg-blue-600 text-white py-3 rounded-xl font-bold transition-colors">
+                            Ver Ficha Completa
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderEPPTabs() {
+            document.getElementById('epp-tabs').innerHTML = chemicals.map((c, i) => `
+                <button onclick="showEPPTab(${i})" id="epp-tab-${i}" class="px-5 py-2 rounded-full font-bold text-sm ${i === 0 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600'} whitespace-nowrap">
+                    ${c.name}
+                </button>
+            `).join('');
+
+            document.getElementById('epp-contents').innerHTML = chemicals.map((c, i) => `
+                <div id="epp-content-${i}" class="${i === 0 ? 'block' : 'hidden'}">
+                    <div class="bg-gradient-to-r ${c.gradient} rounded-xl p-4 mb-6 text-white">
+                        <div class="flex items-center gap-3">
+                            <img src="assets/${c.image}" class="w-16 h-16 object-contain bg-white/20 rounded-xl" alt="${c.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <span class="text-4xl hidden">🧪</span>
+                            <div>
+                                <h2 class="text-xl font-black">${c.name} ${c.formula}</h2>
+                                <p class="text-white/80 text-sm">CAS: ${c.cas} • ${c.hazardClass}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        ${(c.epp || []).map(epp => `
+                            <div class="epp-card bg-white dark:bg-slate-900 rounded-xl p-5 shadow-lg border-2 border-slate-200 text-center">
+                                <div class="size-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <img src="assets/${c.image}" class="size-16 object-contain" alt="${epp.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <span class="text-5xl hidden">🧪</span>
+                                </div>
+                                <h3 class="font-bold text-slate-900 dark:text-white mb-1">${epp.name}</h3>
+                                <p class="text-xs text-slate-500 mb-3">${epp.desc}</p>
+                                <span class="inline-flex items-center gap-1 text-xs font-bold text-${epp.color}-600 bg-${epp.color}-100 px-3 py-1 rounded-full">
+                                    <span class="material-symbols-outlined text-sm">verified</span> OBLIGATORIO
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showEPPTab(index) {
+            chemicals.forEach((_, i) => {
+                document.getElementById(`epp-content-${i}`)?.classList.toggle('hidden', i !== index);
+                document.getElementById(`epp-tab-${i}`)?.classList.toggle('bg-primary', i === index);
+                document.getElementById(`epp-tab-${i}`)?.classList.toggle('text-white', i === index);
+                document.getElementById(`epp-tab-${i}`)?.classList.toggle('bg-slate-100', i !== index);
+                document.getElementById(`epp-tab-${i}`)?.classList.toggle('text-slate-600', i !== index);
+            });
+        }
+
         function showChemicalDetail(index) {
             currentChemical = chemicals[index];
             const c = currentChemical;
 
-            // Update header
             document.getElementById('detail-name').textContent = c.name;
             document.getElementById('detail-title').textContent = c.name;
-            document.getElementById('detail-icon').innerHTML = `<img src="${c.imageFile}" class="w-16 h-16 object-contain" alt="${c.name}" onerror="this.style.display='none'">`;
+            const iconImg = document.getElementById('detail-icon-img');
+            iconImg.src = `assets/${c.image}`;
+            iconImg.classList.remove('hidden');
+            document.getElementById('detail-icon').classList.add('hidden');
             document.getElementById('detail-cas').textContent = `CAS: ${c.cas} • ${c.formula}`;
             document.getElementById('detail-header').className = `bg-gradient-to-r ${c.gradient} rounded-2xl p-6 mb-6 text-white`;
             document.getElementById('detail-badge1').textContent = c.hazardClass;
             document.getElementById('detail-badge2').textContent = c.riskLevel.toUpperCase();
 
-            // Update hazards
             document.getElementById('detail-hazards').textContent = c.hazards;
 
-            // Update first aid
             document.getElementById('detail-firstaid').innerHTML = `
                 <div class="p-3 bg-blue-50 rounded-lg">
                     <h4 class="font-bold text-blue-700 text-sm mb-1">🌬️ Inhalación</h4>
@@ -1102,34 +580,24 @@
                 </div>
             `;
 
-            // Update storage
             document.getElementById('detail-storage').textContent = c.storage;
 
-            // =====================================================
-            // INCLUDE NEW EPP IMAGE HERE
-            // Para usar imagen real en vez de emoji, modifica el template:
-            // Cambia: <span class="text-3xl">${item.icon}</span>
-            // Por:    <img src="assets/epp/${item.image}" class="size-14 object-contain">
-            // =====================================================
-
-            // Update EPP Grid
-            const eppGrid = document.getElementById('epp-grid');
-            eppGrid.innerHTML = c.epp.map(item => `
+            document.getElementById('epp-grid').innerHTML = (c.epp || []).map(item => `
                 <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20 text-center">
                     <div class="size-14 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <span class="text-3xl">${item.icon}</span>
+                        <img src="assets/${c.image}" class="size-12 object-contain" alt="${item.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <span class="text-3xl hidden">🧪</span>
                     </div>
                     <h5 class="text-white font-bold text-sm mb-1">${item.name}</h5>
                     <p class="text-${item.color}-200 text-xs">${item.desc}</p>
                 </div>
             `).join('');
 
-            // Update EPP List
-            const eppList = document.getElementById('epp-list');
-            eppList.innerHTML = c.epp.map((item, i) => `
+            document.getElementById('epp-list').innerHTML = (c.epp || []).map((item, i) => `
                 <div class="flex items-start gap-3 p-3 rounded-lg ${i % 2 === 0 ? 'bg-slate-50' : ''}">
                     <div class="size-10 bg-${item.color}-100 rounded-lg flex items-center justify-center shrink-0">
-                        <span class="text-xl">${item.icon}</span>
+                        <img src="assets/${c.image}" class="size-8 object-contain" alt="${item.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <span class="text-xl hidden">🧪</span>
                     </div>
                     <div class="flex-1">
                         <h4 class="font-bold text-slate-900 text-sm">${item.name}</h4>
@@ -1138,30 +606,28 @@
                 </div>
             `).join('');
 
-            // Update FDS button
-            document.getElementById('download-fds-btn').onclick = () => downloadFDS();
-
             navigateTo('detail');
         }
 
-        // EPP Tab Switching
-        function showEPPTab(index) {
-            for (let i = 0; i < 3; i++) {
-                document.getElementById(`epp-content-${i}`).classList.toggle('hidden', i !== index);
-                document.getElementById(`epp-tab-${i}`).classList.toggle('bg-primary', i === index);
-                document.getElementById(`epp-tab-${i}`).classList.toggle('text-white', i === index);
-                document.getElementById(`epp-tab-${i}`).classList.toggle('bg-slate-100', i !== index);
-                document.getElementById(`epp-tab-${i}`).classList.toggle('text-slate-600', i !== index);
-            }
+        function renderHistory() {
+            document.getElementById('history-body').innerHTML = chemicals.map((c, i) => `
+                <tr onclick="showChemicalDetail(${i})" class="hover:bg-slate-50 cursor-pointer">
+                    <td class="px-6 py-4"><span class="text-sm font-medium text-slate-900">${new Date().toLocaleDateString()}</span><br><span class="text-xs text-slate-500">${new Date().toLocaleTimeString()}</span></td>
+                    <td class="px-6 py-4"><span class="font-bold text-slate-900">${c.name}</span></td>
+                    <td class="px-6 py-4"><span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded">${c.cas}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">${c.riskLevel}</span></td>
+                    <td class="px-6 py-4 text-sm text-slate-500">-</td>
+                    <td class="px-6 py-4"><button class="text-primary text-sm font-bold hover:underline">Ver</button></td>
+                </tr>
+            `).join('');
         }
 
-        // Simulate Scan
         function simulateScan(index = null) {
             const overlay = document.getElementById('ocr-overlay');
             const statusEl = document.getElementById('ocr-status');
             overlay.classList.remove('hidden');
 
-            const steps = ['Iniciando cámara...', 'Detectando texto...', 'Procesando OCR...', 'Analizando código CAS...', 'Coincidencia encontrada'];
+            const steps = ['Iniciando cámara...', 'Detectando texto...', 'Procesando OCR...', 'Analizando código CAS...', 'Producto identificado'];
             let i = 0;
 
             const interval = setInterval(() => {
@@ -1171,62 +637,36 @@
                     clearInterval(interval);
                     setTimeout(() => {
                         overlay.classList.add('hidden');
-                        const idx = index !== null ? index : Math.floor(Math.random() * 3);
+                        const idx = index !== null ? index : Math.floor(Math.random() * chemicals.length);
                         showChemicalDetail(idx);
                     }, 600);
                 }
             }, 400);
         }
 
-        /* ================================================================
-           INSTRUCCIONES PARA VINCULAR PDFs DE FDS REALES:
-           
-           1. Coloca tus archivos PDF en la carpeta raíz del proyecto
-              - FDS_acido sulfurico.pdf (ya existe)
-              - FDS_Hipoclorito de Sodio.pdf (ya existe)  
-              - FDS_Acetona.pdf (ya existe)
-              - Agrega tus nuevos PDFs con nombre: FDS_Nombre_Quimico.pdf
-           
-           2. Modifica la funcion downloadFDS() abajo para descarga real
-           
-           3. El nombre del archivo debe coincidir con 'fdsFile' en el array
-              chemicals
-           ================================================================ */
-
-        // Download FDS - REAL PDF DOWNLOAD
         function downloadFDS() {
             if (!currentChemical) return;
 
-            // Download real PDF file
             const link = document.createElement('a');
-            link.href = currentChemical.fdsFile;
+            link.href = `assets/${currentChemical.fdsFile}`;
             link.download = currentChemical.fdsFile;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+            const notification = document.getElementById('fds-notification');
+            document.getElementById('fds-file-name').textContent = currentChemical.fdsFile;
+            notification.classList.remove('hidden');
+            setTimeout(() => notification.classList.add('hidden'), 3000);
         }
 
-        // Initialize
+        // Register Service Worker
         document.addEventListener('DOMContentLoaded', () => {
-            navigateTo('dashboard');
+            loadChemicals();
 
-            // Register Service Worker for PWA
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => {
-                        console.log('Service Worker registered');
-                        reg.addEventListener('updatefound', () => {
-                            const worker = reg.installing;
-                            worker.addEventListener('statechange', () => {
-                                if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    if (confirm('Nueva versión disponible. ¿Actualizar ahora?')) {
-                                        worker.postMessage({ type: 'SKIP_WAITING' });
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
+                    .then(reg => console.log('Service Worker registered'))
                     .catch(err => console.log('SW registration failed:', err));
             }
         });
