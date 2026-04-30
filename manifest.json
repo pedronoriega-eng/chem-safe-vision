@@ -1,0 +1,20 @@
+{
+  "name": "ChemSafe Vision",
+  "short_name": "ChemSafe",
+  "start_url": "./demo.html",
+  "display": "standalone",
+  "background_color": "#111921",
+  "theme_color": "#197fe6",
+  "icons": [
+    {
+      "src": "acido sulfurico.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "acido sulfurico.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
