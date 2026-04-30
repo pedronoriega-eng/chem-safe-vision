@@ -1,0 +1,79 @@
+{
+  "chemicals": [
+    {
+      "id": "acido-sulfurico",
+      "name": "Ácido Sulfúrico 98%",
+      "cas": "7664-93-9",
+      "formula": "H₂SO₄",
+      "riskLevel": "Alto",
+      "hazardClass": "CORROSIVO",
+      "gradient": "from-red-600 to-red-800",
+      "image": "acido sulfurico.png",
+      "fdsFile": "FDS_acido sulfurico.pdf",
+      "hazards": "Causa quemaduras graves en piel y ojos. Puede ser corrosivo para los metales. La ingestión causa daño severo al tracto gastrointestinal. La inhalación de vapores puede causar irritación respiratoria severa. Altamente corrosivo. Contacto puede causar ceguera permanente.",
+      "firstAid": {
+        "inhalation": "Transportar al aire fresco. Si no respira, dar respiración artificial. Buscar atención médica inmediata.",
+        "skin": "Retirar ropa contaminada. Lavar inmediatamente con agua abundante durante 20+ minutos. Aplicar solución de bicarbonato de sodio.",
+        "eyes": "Enjuagar con agua durante 15-20 minutos manteniendo párpados abiertos. Buscar atención oftalmológica inmediatamente.",
+        "ingestion": "NO provocar vómito. Enjuagar boca. No dar nada por boca. Buscar atención médica inmediata."
+      },
+      "storage": "Almacenar en área bien ventilada, fresco y seco. Mantener contenedor tightly cerrado. Separado de materiales combustibles y bases. Usar contenedor de material resistente a ácidos. Ubicar en áreas con contención para derrames.",
+      "epp": [
+        { "name": "Careta Completa", "desc": "Protección facial total contra salpicaduras", "color": "blue" },
+        { "name": "Guantes de Butilo", "desc": "8mm espesor, resistencia ácida superior", "color": "green" },
+        { "name": "Traje Hazmat A", "desc": "Nivel A, máxima protección química", "color": "orange" },
+        { "name": "Respirador Acid Gas", "desc": "Cartucho para vapores ácidos", "color": "purple" }
+      ]
+    },
+    {
+      "id": "hipoclorito-sodio",
+      "name": "Hipoclorito de Sodio",
+      "cas": "7681-52-9",
+      "formula": "NaOCl",
+      "riskLevel": "Medio",
+      "hazardClass": "OXIDANTE",
+      "gradient": "from-orange-500 to-amber-600",
+      "image": "Hipoclorito de Sodio.png",
+      "fdsFile": "FDS_Hipoclorito de Sodio.pdf",
+      "hazards": "Puede intensificar incendios. Causa irritación cutánea severa. Muy tóxico para organismos acuáticos. El contacto con ácidos libera gas cloro - POTENCIALMENTE FATAL. Los vapores pueden causar irritación respiratoria.",
+      "firstAid": {
+        "inhalation": "Salir al aire fresco. Si hay dificultad respiratoria, administrar oxígeno. Llamar a emergencias si persisten síntomas.",
+        "skin": "Lavarse inmediatamente con agua y jabón. Enjuagar con solución de bisulfito de sodio si disponible.",
+        "eyes": "Enjuagar con agua durante 15 minutos. Retirar lentes de contacto. Buscar atención médica.",
+        "ingestion": "NO provocar vómito. Beber leche o agua. Buscar atención médica inmediata. No administrar carbón activado."
+      },
+      "storage": "Almacenar en lugar fresco y bien ventilado. Mantener alejado de ácidos y materiales incompatibles. Proteger de la luz solar directa. El contenedor debe estar etiquetado claramente. Tener sistema de contención para derrames.",
+      "epp": [
+        { "name": "Gafas de Seguridad", "desc": "Ventilación indirecta obligatoria", "color": "blue" },
+        { "name": "Guantes de Neopreno", "desc": "5mm espesor, aislamiento químico", "color": "green" },
+        { "name": "Delantal Químico", "desc": "Resistente a salpicaduras", "color": "yellow" },
+        { "name": "Sin Respirador", "desc": "No requerido para uso normal", "color": "slate" }
+      ]
+    },
+    {
+      "id": "acetona",
+      "name": "Acetona Técnica",
+      "cas": "67-64-1",
+      "formula": "C₃H₆O",
+      "riskLevel": "Inflamable",
+      "hazardClass": "INFLAMABLE",
+      "gradient": "from-blue-500 to-indigo-600",
+      "image": "acetona.png",
+      "fdsFile": "FDS_Acetona.pdf",
+      "hazards": "Líquido y vapores extremadamente inflamables. Puede formar mezclas explosivas con aire. Causa irritación ocular grave. Puede causar somnolencia o mareos. La inhalación de vapores puede causar irritación del tracto respiratorio. Los vapores son más pesados que el aire.",
+      "firstAid": {
+        "inhalation": "Transportar al aire fresco. Si hay dificultad respiratoria, administrar oxígeno. Si está inconsciente, colocar en posición de recuperación.",
+        "skin": "Lavarse con agua y jabón. En caso de congelación por derrame, no remover ropa congelada. Buscar atención médica si hay irritación.",
+        "eyes": "Enjuagar con agua durante 15 minutos. Buscar atención médica si persiste irritación.",
+        "ingestion": "NO inducir vómito. Enjuagar boca. Beber agua o leche. No dar nada a persona inconsciente. Buscar atención médica."
+      },
+      "storage": "Almacenar en área fresca, bien ventilada, lejos de fuentes de ignición y calor. Contenedor debe estar tightly cerrado. Conectar a tierra durante transferencia para evitar carga estática. Almacenar en área específica para líquidos inflamables con contención.",
+      "epp": [
+        { "name": "Gafas Anti-Salpicaduras", "desc": "Protección ocular completa", "color": "blue" },
+        { "name": "Guantes de Nitrilo", "desc": "Resistentes a solventes orgánicos", "color": "green" },
+        { "name": "Bata de Laboratorio", "desc": "Algodón tratado retardante", "color": "orange" },
+        { "name": "Respirador Vapores", "desc": "Solo si TWA excedido", "color": "purple" }
+      ]
+    }
+  ]
+}
